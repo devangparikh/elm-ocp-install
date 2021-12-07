@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elm-app-deployment
+spec:
+  selector:
+    matchLabels:
+      app: elm-app
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: elm-app
+    spec:
+      initContainers:
+      - name: gen-pem
+        image: registry.access.redhat.com/redhat-sso-7/sso71-openshift:1.1-16
+        env:
+          - name: keyfile
+            value: /etc/secret-volume/tls.key
+          - name: crtfile
+            value: /etc/secret-volume/tls.crt
+          - name: keystore_pkcs12
+            value: /etc/keystores/keystore.pkcs12
+          - name: password
+            valueFrom:
+              secretKeyRef:
+                name: elm-certificate-store
+                key: password
+        command: ['/bin/bash']
+        args: ['-c', "openssl pkcs12 -export -inkey $keyfile -in $crtfile -out $keystore_pkcs12 -passout pass:$password"]
+        volumeMounts:
+        - name: keystore-volume
+          mountPath: /etc/keystores
+        - name: secret-volume
+          mountPath: /etc/secret-volume   
+          
+      containers:
+      - name: elm-app
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        ports:
+        - containerPort: 9443
+        volumeMounts:
+        - name: config-elm
+          mountPath: /IBM/JazzTeamServer/server/conf
+        - name: servers-elm
+          mountPath: /IBM/JazzTeamServer/server/liberty/servers
+        - name: secret-volume
+          mountPath: /etc/secret-volume
+        - name: keystore-volume
+          mountPath: /etc/keystores
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: keystore_pkcs12
+            value: /etc/keystores/keystore.pkcs12
+          - name: keystore_pw
+            valueFrom:
+              secretKeyRef:
+                name: elm-certificate-store
+                key: password
+      volumes:
+      - name: config-elm
+        persistentVolumeClaim:
+          claimName: elm-app-config
+          readOnly: false
+      - name: servers-elm
+        persistentVolumeClaim:
+          claimName: elm-app-servers
+          readOnly: false
+      - name: secret-volume
+        secret:
+          secretName: elm-app-service
+      - name: keystore-volume
+        emptyDir: {}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,17 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: elm-route
+  annotations:
+    haproxy.router.openshift.io/timeout: '300s'
+spec:
+  host: elm-route-elm.apps.elm-ocp-dev.cp.fyre.ibm.com
+  to:
+    kind: Service
+    name: elm-app-service
+    weight: 100
+  port:
+    targetPort: 9443
+  tls:
+    termination: reencrypt
+  wildcardPolicy: None

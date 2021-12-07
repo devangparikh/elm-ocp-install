@@ -1,0 +1,1 @@
+oc create secret docker-registry ibm-artifactory-dcr --docker-server=${REGISTRY_URL} --docker-username=${REGISTRY_USERNAME} --docker-password=${REGISTRY_PASSWORD} --docker-email=${REGISTRY_USERNAME}
