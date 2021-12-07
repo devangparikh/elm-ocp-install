@@ -8,7 +8,7 @@ image:
   repository: "iot-elm-dcr-team-docker-local.artifactory.swg-devops.com/elm-ocp"
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.0.1"
+  tag: "latest"
 
 imagePullSecrets: 
   - name: ibm-artifactory-dcr
