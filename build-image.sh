@@ -19,11 +19,11 @@ then
   exit 1
 fi
 
-#rm -rf copy
-#mkdir copy
-#cp -R ${JAZZ_TEAM_SERVER} ./copy/JazzTeamServer
-#sed -i 's/<keyStore id="defaultKeyStore".*/<keyStore id="defaultKeyStore" location="${keystore_pkcs12}" type="PKCS12" password="${keystore_pw}"\/>/g' ./copy/JazzTeamServer/server/liberty/clmServerTemplate/server.xml
-#mv ./copy/JazzTeamServer/server/conf ./copy/JazzTeamServer/server/confTemplate
+rm -rf copy
+mkdir copy
+cp -R ${JAZZ_TEAM_SERVER} ./copy/JazzTeamServer
+sed -i 's/<keyStore id="defaultKeyStore".*/<keyStore id="defaultKeyStore" location="${keystore_pkcs12}" type="PKCS12" password="${keystore_pw}"\/>/g' ./copy/JazzTeamServer/server/liberty/clmServerTemplate/server.xml
+mv ./copy/JazzTeamServer/server/conf ./copy/JazzTeamServer/server/confTemplate
 
 docker build -t elm-ocp:latest -f ./docker/Dockerfile .
 docker login -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASSWORD} ${REGISTRY_URL}
